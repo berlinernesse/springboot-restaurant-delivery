@@ -21,8 +21,8 @@ function RestaurantDetailsPage() {
         setError("");
 
         const [restaurantResponse, foodItemsResponse] = await Promise.all([
-          fetch(`http://localhost:8082/api/restaurants/${id}`),
-          fetch(`http://localhost:8082/api/fooditems/restaurant/${id}`),
+          fetch(`/api/restaurants/${id}`),
+          fetch(`/api/fooditems/restaurant/${id}`),
         ]);
 
         if (!restaurantResponse.ok) {

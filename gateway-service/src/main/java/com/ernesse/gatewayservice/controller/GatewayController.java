@@ -4,7 +4,6 @@ import com.ernesse.gatewayservice.model.FoodItem;
 import com.ernesse.gatewayservice.model.Order;
 import com.ernesse.gatewayservice.model.Restaurant;
 import com.ernesse.gatewayservice.service.GatewayApiService;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +15,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:5173")
+
 public class GatewayController {
 
     private final GatewayApiService gatewayApiService;

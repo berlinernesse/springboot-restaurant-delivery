@@ -1977,3 +1977,45 @@ input {
     line-height: 1.7;
   }
 }
+
+.form-error {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: #c0392b;
+  font-weight: 600;
+}
+
+.payment-method-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.payment-method-option {
+  border: 1px solid #ead6d6;
+  background: #fff7f7;
+  color: #5a2e33;
+  border-radius: 18px;
+  padding: 16px 18px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.payment-method-option:hover {
+  transform: translateY(-1px);
+}
+
+.active-payment-method {
+  border-color: #cf3a16;
+  background: #fff1ec;
+  box-shadow: 0 10px 24px rgba(207, 58, 22, 0.12);
+}
+
+.payment-method-note {
+  margin-top: 10px;
+  color: #7d5a5f;
+  line-height: 1.7;
+}

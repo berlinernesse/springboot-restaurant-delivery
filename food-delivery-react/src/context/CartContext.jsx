@@ -16,10 +16,6 @@ export function CartProvider({ children }) {
     const currentRestaurantId = cartItems[0].restaurantId;
 
     if (currentRestaurantId !== newItem.restaurantId) {
-      console.log("Conflict detected");
-      console.log("Current cart restaurant:", currentRestaurantId);
-      console.log("New item restaurant:", newItem.restaurantId);
-
       setPendingCartItem(newItem);
       setShowRestaurantConflictModal(true);
       return;
@@ -91,6 +87,44 @@ export function CartProvider({ children }) {
 
   const total = useMemo(() => subtotal + fees, [subtotal, fees]);
 
+  const placeOrder = async ({ paymentMethod = "card" } = {}) => {
+    if (cartItems.length === 0) {
+      throw new Error("Cart is empty.");
+    }
+
+    const restaurantId = cartItems[0].restaurantId;
+    const foodItemIds = cartItems.flatMap((item) =>
+      Array(item.quantity).fill(item.id)
+    );
+
+    const orderPayload = {
+      customerId: "demo-customer-001",
+      restaurantId,
+      foodItemIds,
+      totalAmount: total,
+      orderStatus: "Placed",
+      paymentMethod,
+      paymentStatus: "Paid",
+      orderDate: new Date().toISOString(),
+    };
+
+    const response = await fetch("/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(orderPayload),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to place order.");
+    }
+
+    const savedOrder = await response.json();
+    clearCart();
+    return savedOrder;
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -106,6 +140,7 @@ export function CartProvider({ children }) {
         showRestaurantConflictModal,
         confirmReplaceCart,
         cancelReplaceCart,
+        placeOrder,
       }}
     >
       {children}

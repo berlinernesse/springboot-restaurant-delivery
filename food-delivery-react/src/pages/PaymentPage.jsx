@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TopNav from "../components/TopNav";
 import Footer from "../components/Footer";
@@ -6,12 +7,96 @@ import { useCart } from "../context/CartContext";
 function PaymentPage() {
   const navigate = useNavigate();
   const { cartItems, subtotal, fees, total, placeOrder } = useCart();
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("card");
 
-  const handlePlaceOrder = () => {
-    if (cartItems.length === 0) return;
-    placeOrder();
-    navigate("/confirmation");
+  const [formData, setFormData] = useState({
+    cardholderName: "",
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    address: "",
+    city: "",
+    province: "",
+    postalCode: "",
+  });
+
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((current) => ({
+      ...current,
+      [name]: value,
+    }));
+
+    setErrors((current) => ({
+      ...current,
+      [name]: "",
+    }));
   };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (selectedPaymentMethod === "card") {
+      if (!formData.cardholderName.trim()) {
+        newErrors.cardholderName = "Cardholder name is required.";
+      }
+
+      if (!formData.cardNumber.trim()) {
+        newErrors.cardNumber = "Card number is required.";
+      } else if (!/^\d{16}$/.test(formData.cardNumber.replace(/\s/g, ""))) {
+        newErrors.cardNumber = "Card number must be 16 digits.";
+      }
+
+      if (!formData.expiryDate.trim()) {
+        newErrors.expiryDate = "Expiry date is required.";
+      } else if (!/^(0[1-9]|1[0-2])\s?\/\s?\d{2}$/.test(formData.expiryDate)) {
+        newErrors.expiryDate = "Use MM/YY format.";
+      }
+
+      if (!formData.cvv.trim()) {
+        newErrors.cvv = "CVV is required.";
+      } else if (!/^\d{3,4}$/.test(formData.cvv)) {
+        newErrors.cvv = "CVV must be 3 or 4 digits.";
+      }
+    }
+
+    if (!formData.address.trim()) {
+      newErrors.address = "Billing address is required.";
+    }
+
+    if (!formData.city.trim()) {
+      newErrors.city = "City is required.";
+    }
+
+    if (!formData.province.trim()) {
+      newErrors.province = "Province is required.";
+    }
+
+    if (!formData.postalCode.trim()) {
+      newErrors.postalCode = "Postal code is required.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handlePlaceOrder = async () => {
+  if (cartItems.length === 0) return;
+
+  const isValid = validateForm();
+  if (!isValid) return;
+
+  try {
+    await placeOrder({ paymentMethod: selectedPaymentMethod });
+    navigate("/confirmation");
+  } catch (error) {
+    console.error(error);
+    alert("Something went wrong while placing your order.");
+  }
+};
 
   return (
     <div className="site-shell">
@@ -44,6 +129,54 @@ function PaymentPage() {
 
             <section className="payment-section">
               <div className="payment-section-header">
+                <h2>Payment Method</h2>
+              </div>
+
+              <div className="payment-method-grid">
+                <button
+                  type="button"
+                  className={`payment-method-option ${
+                    selectedPaymentMethod === "card" ? "active-payment-method" : ""
+                  }`}
+                  onClick={() => setSelectedPaymentMethod("card")}
+                >
+                  💳 Card
+                </button>
+
+                <button
+                  type="button"
+                  className={`payment-method-option ${
+                    selectedPaymentMethod === "applepay" ? "active-payment-method" : ""
+                  }`}
+                  onClick={() => setSelectedPaymentMethod("applepay")}
+                >
+                  🍎 Apple Pay
+                </button>
+
+                <button
+                  type="button"
+                  className={`payment-method-option ${
+                    selectedPaymentMethod === "googlepay" ? "active-payment-method" : ""
+                  }`}
+                  onClick={() => setSelectedPaymentMethod("googlepay")}
+                >
+                  🟢 Google Pay
+                </button>
+
+                <button
+                  type="button"
+                  className={`payment-method-option ${
+                    selectedPaymentMethod === "paypal" ? "active-payment-method" : ""
+                  }`}
+                  onClick={() => setSelectedPaymentMethod("paypal")}
+                >
+                  🅿️ PayPal
+                </button>
+              </div>
+            </section>
+
+            <section className="payment-section">
+              <div className="payment-section-header">
                 <h2>Saved Methods</h2>
                 <button type="button" className="text-action">
                   Add New
@@ -72,31 +205,67 @@ function PaymentPage() {
               </div>
             </section>
 
-            <section className="payment-form-card">
-              <h3>Card Details</h3>
+            {selectedPaymentMethod === "card" && (
+              <section className="payment-form-card">
+                <h3>Card Details</h3>
 
-              <div className="form-group">
-                <label>Cardholder Name</label>
-                <input type="text" placeholder="Name as it appears on card" />
-              </div>
-
-              <div className="form-group">
-                <label>Card Number</label>
-                <input type="text" placeholder="0000 0000 0000 0000" />
-              </div>
-
-              <div className="payment-form-row">
                 <div className="form-group">
-                  <label>Expiry Date</label>
-                  <input type="text" placeholder="MM / YY" />
+                  <label>Cardholder Name</label>
+                  <input
+                    type="text"
+                    name="cardholderName"
+                    placeholder="Name as it appears on card"
+                    value={formData.cardholderName}
+                    onChange={handleChange}
+                  />
+                  {errors.cardholderName && (
+                    <p className="form-error">{errors.cardholderName}</p>
+                  )}
                 </div>
 
                 <div className="form-group">
-                  <label>CVV</label>
-                  <input type="text" placeholder="•••" />
+                  <label>Card Number</label>
+                  <input
+                    type="text"
+                    name="cardNumber"
+                    placeholder="0000 0000 0000 0000"
+                    value={formData.cardNumber}
+                    onChange={handleChange}
+                  />
+                  {errors.cardNumber && (
+                    <p className="form-error">{errors.cardNumber}</p>
+                  )}
                 </div>
-              </div>
-            </section>
+
+                <div className="payment-form-row">
+                  <div className="form-group">
+                    <label>Expiry Date</label>
+                    <input
+                      type="text"
+                      name="expiryDate"
+                      placeholder="MM / YY"
+                      value={formData.expiryDate}
+                      onChange={handleChange}
+                    />
+                    {errors.expiryDate && (
+                      <p className="form-error">{errors.expiryDate}</p>
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <label>CVV</label>
+                    <input
+                      type="text"
+                      name="cvv"
+                      placeholder="•••"
+                      value={formData.cvv}
+                      onChange={handleChange}
+                    />
+                    {errors.cvv && <p className="form-error">{errors.cvv}</p>}
+                  </div>
+                </div>
+              </section>
+            )}
 
             <section className="payment-form-card">
               <div className="billing-header">
@@ -110,19 +279,48 @@ function PaymentPage() {
               <div className="form-group">
                 <input
                   type="text"
+                  name="address"
                   placeholder="128 Editorial Way, Culinary District"
+                  value={formData.address}
+                  onChange={handleChange}
                 />
+                {errors.address && <p className="form-error">{errors.address}</p>}
               </div>
 
               <div className="payment-form-row three-column-row">
                 <div className="form-group">
-                  <input type="text" placeholder="New York" />
+                  <input
+                    type="text"
+                    name="city"
+                    placeholder="New York"
+                    value={formData.city}
+                    onChange={handleChange}
+                  />
+                  {errors.city && <p className="form-error">{errors.city}</p>}
                 </div>
                 <div className="form-group">
-                  <input type="text" placeholder="NY" />
+                  <input
+                    type="text"
+                    name="province"
+                    placeholder="NY"
+                    value={formData.province}
+                    onChange={handleChange}
+                  />
+                  {errors.province && (
+                    <p className="form-error">{errors.province}</p>
+                  )}
                 </div>
                 <div className="form-group">
-                  <input type="text" placeholder="10012" />
+                  <input
+                    type="text"
+                    name="postalCode"
+                    placeholder="10012"
+                    value={formData.postalCode}
+                    onChange={handleChange}
+                  />
+                  {errors.postalCode && (
+                    <p className="form-error">{errors.postalCode}</p>
+                  )}
                 </div>
               </div>
             </section>
@@ -147,7 +345,8 @@ function PaymentPage() {
                         <div className="summary-item-text">
                           <h4>{item.name}</h4>
                           <p>
-                            {item.quantity}x {item.subtitle || item.category || "Curated Selection"}
+                            {item.quantity}x{" "}
+                            {item.subtitle || item.category || "Curated Selection"}
                           </p>
                         </div>
                         <div className="summary-item-price">

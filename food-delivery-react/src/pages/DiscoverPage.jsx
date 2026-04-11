@@ -9,7 +9,7 @@ function DiscoverPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:8082/api/restaurants")
+    fetch("/api/restaurants")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Failed to fetch restaurants");
