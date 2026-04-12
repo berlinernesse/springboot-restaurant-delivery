@@ -6,6 +6,7 @@ export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
   const [pendingCartItem, setPendingCartItem] = useState(null);
   const [showRestaurantConflictModal, setShowRestaurantConflictModal] = useState(false);
+  const [lastOrder, setLastOrder] = useState(null);
 
   const addToCart = (newItem) => {
     if (cartItems.length === 0) {
@@ -87,21 +88,25 @@ export function CartProvider({ children }) {
 
   const total = useMemo(() => subtotal + fees, [subtotal, fees]);
 
-  const placeOrder = async ({ paymentMethod = "card" } = {}) => {
+  const placeOrder = async ({ paymentMethod = "card", customerId } = {}) => {
     if (cartItems.length === 0) {
       throw new Error("Cart is empty.");
     }
 
-    const restaurantId = cartItems[0].restaurantId;
-    const foodItemIds = cartItems.flatMap((item) =>
-      Array(item.quantity).fill(item.id)
-    );
+    if (!customerId) {
+      throw new Error("You must be logged in to place an order.");
+    }
+
+    const restaurantId = cartItems[0]?.restaurantId;
+    const foodItemIds = cartItems
+      .flatMap((item) => Array(item.quantity).fill(item.id))
+      .filter(Boolean);
 
     const orderPayload = {
-      customerId: "demo-customer-001",
-      restaurantId,
+      customerId,
+      restaurantId: String(restaurantId),
       foodItemIds,
-      totalAmount: total,
+      totalAmount: Number(total),
       orderStatus: "Placed",
       paymentMethod,
       paymentStatus: "Paid",
@@ -116,13 +121,30 @@ export function CartProvider({ children }) {
       body: JSON.stringify(orderPayload),
     });
 
+    const responseText = await response.text();
+
     if (!response.ok) {
-      throw new Error("Failed to place order.");
+      throw new Error(`Failed to place order: ${response.status} ${responseText}`);
     }
 
-    const savedOrder = await response.json();
+    const savedOrderFromApi = responseText ? JSON.parse(responseText) : null;
+
+    const detailedOrder = {
+      id: savedOrderFromApi?.id || savedOrderFromApi?._id || "N/A",
+      items: cartItems,
+      subtotal,
+      fees,
+      total,
+      paymentMethod,
+      customerId,
+      restaurantId,
+      foodItemIds,
+      apiOrder: savedOrderFromApi,
+    };
+
+    setLastOrder(detailedOrder);
     clearCart();
-    return savedOrder;
+    return detailedOrder;
   };
 
   return (
@@ -141,6 +163,7 @@ export function CartProvider({ children }) {
         confirmReplaceCart,
         cancelReplaceCart,
         placeOrder,
+        lastOrder,
       }}
     >
       {children}

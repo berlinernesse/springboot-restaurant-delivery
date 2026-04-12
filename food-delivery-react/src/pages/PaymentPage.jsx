@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import TopNav from "../components/TopNav";
 import Footer from "../components/Footer";
 import { useCart } from "../context/CartContext";
+import { useUser } from "../context/UserContext";
 
 function PaymentPage() {
   const navigate = useNavigate();
   const { cartItems, subtotal, fees, total, placeOrder } = useCart();
+  const { currentUser } = useUser();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("card");
 
   const [formData, setFormData] = useState({
@@ -84,19 +86,27 @@ function PaymentPage() {
   };
 
   const handlePlaceOrder = async () => {
-  if (cartItems.length === 0) return;
+    if (cartItems.length === 0) return;
 
-  const isValid = validateForm();
-  if (!isValid) return;
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
 
-  try {
-    await placeOrder({ paymentMethod: selectedPaymentMethod });
-    navigate("/confirmation");
-  } catch (error) {
-    console.error(error);
-    alert("Something went wrong while placing your order.");
-  }
-};
+    const isValid = validateForm();
+    if (!isValid) return;
+
+    try {
+      await placeOrder({
+        paymentMethod: selectedPaymentMethod,
+        customerId: currentUser.id,
+      });
+      navigate("/confirmation");
+    } catch (error) {
+      console.error(error);
+      alert(error.message || "Something went wrong while placing your order.");
+    }
+  };
 
   return (
     <div className="site-shell">
@@ -126,6 +136,22 @@ function PaymentPage() {
               <h1>Secure Payment</h1>
               <p>Your transaction is encrypted and secured by CuratedPay.</p>
             </div>
+
+            {!currentUser && (
+              <div className="payment-form-card">
+                <h3>Please Sign In</h3>
+                <p className="directory-message" style={{ marginTop: 0 }}>
+                  You need an account before placing an order.
+                </p>
+                <button
+                  type="button"
+                  className="place-order-button"
+                  onClick={() => navigate("/login")}
+                >
+                  Go to Login
+                </button>
+              </div>
+            )}
 
             <section className="payment-section">
               <div className="payment-section-header">

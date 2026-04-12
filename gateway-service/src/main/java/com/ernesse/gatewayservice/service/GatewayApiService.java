@@ -3,6 +3,7 @@ package com.ernesse.gatewayservice.service;
 import com.ernesse.gatewayservice.model.FoodItem;
 import com.ernesse.gatewayservice.model.Order;
 import com.ernesse.gatewayservice.model.Restaurant;
+import com.ernesse.gatewayservice.model.Customer;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -59,4 +60,36 @@ public class GatewayApiService {
                 .retrieve()
                 .bodyToMono(Order.class);
     }
+
+    public Mono<Customer> getCustomerById(String id) {
+        return webClient.get()
+                .uri("/customers/{id}", id)
+                .retrieve()
+                .bodyToMono(Customer.class);
+    }
+
+    public Mono<Customer> getCustomerByEmail(String email) {
+        return webClient.get()
+                .uri("/customers/email/{email}", email)
+                .retrieve()
+                .bodyToMono(Customer.class);
+    }
+
+    public Mono<Customer> createCustomer(Customer customer) {
+        return webClient.post()
+                .uri("/customers")
+                .bodyValue(customer)
+                .retrieve()
+                .bodyToMono(Customer.class);
+    }
+
+    public Mono<Customer> updateCustomer(String id, Customer customer) {
+        return webClient.put()
+                .uri("/customers/{id}", id)
+                .bodyValue(customer)
+                .retrieve()
+                .bodyToMono(Customer.class);
+    }
+
+
 }

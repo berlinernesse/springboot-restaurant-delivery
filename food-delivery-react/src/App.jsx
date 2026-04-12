@@ -5,6 +5,10 @@ import RestaurantDetailsPage from "./pages/RestaurantDetailsPage";
 import CartPage from "./pages/CartPage";
 import PaymentPage from "./pages/PaymentPage";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
+import Login from "./pages/Login";
+import SignupPage from "./pages/SignupPage";
+import ProfilePage from "./pages/ProfilePage";
+import JournalsPage from "./pages/JournalsPage";
 import RestaurantConflictModal from "./components/RestaurantConflictModal";
 import "./App.css";
 
@@ -18,8 +22,13 @@ function App() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/payment" element={<PaymentPage />} />
         <Route path="/confirmation" element={<OrderConfirmationPage />} />
-
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/journals" element={<JournalsPage />} />
+        
       </Routes>
+
       <RestaurantConflictModal />
     </BrowserRouter>
   );
