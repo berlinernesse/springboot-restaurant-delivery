@@ -8,6 +8,15 @@ function DiscoverPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const bannerMap = {
+    "Seoul Bites": "/img/restaurants/seoul_bites.png",
+    "Pasta Corner": "/img/restaurants/pasta_corner.png",
+    "Maple Grill": "/img/restaurants/maple_grill.png",
+    "Compass Test Cafe": "/img/restaurants/compass_test_cafe.png",
+    "Crunch & Munch Cafe": "/img/restaurants/crunch_munch.png",
+    "Sakura Moon Dining": "/img/restaurants/sakura_moon.png"
+  };
+
   useEffect(() => {
     fetch("/api/restaurants")
       .then((response) => {
@@ -17,6 +26,7 @@ function DiscoverPage() {
         return response.json();
       })
       .then((data) => {
+        console.log(data);
         setRestaurants(data);
         setLoading(false);
       })
@@ -35,7 +45,8 @@ function DiscoverPage() {
           <span className="discover-label">Discovery</span>
           <h1>Uncover the city&apos;s most evocative dining rooms.</h1>
           <p>
-            Browse restaurants, explore cuisines, and connect the interface to your real backend data cleanly.
+            Browse restaurants, explore cuisines, and connect the interface to
+            your real backend data cleanly.
           </p>
         </section>
 
@@ -59,7 +70,18 @@ function DiscoverPage() {
                   key={restaurant.id}
                 >
                   <article className="restaurant-card">
-                    <div className="restaurant-card-image" />
+                    <div className="restaurant-card-image">
+                      <img
+                        src={
+                          restaurant.bannerImageUrl ||
+                          bannerMap[restaurant.name] ||
+                          "/img/restaurants/default-banner.png"
+                        }
+                        alt={restaurant.name}
+                        className="restaurant-card-image-tag"
+                      />
+                    </div>
+
                     <div className="restaurant-card-body">
                       <div className="restaurant-card-top">
                         <h3>{restaurant.name}</h3>

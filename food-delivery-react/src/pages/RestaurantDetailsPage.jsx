@@ -14,6 +14,65 @@ function RestaurantDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const restaurantBannerMap = {
+    "Seoul Bites": "/img/restaurants/seoul_bites.png",
+    "Pasta Corner": "/img/restaurants/pasta_corner.png",
+    "Maple Grill": "/img/restaurants/maple_grill.png",
+    "Compass Test Cafe": "/img/restaurants/compass_test.png",
+    "Crunch & Munch Cafe": "/img/restaurants/crunch_munch.png",
+    "Sakura Moon Dining": "/img/restaurants/sakura_moon.png",
+  };
+
+  const foodImageMap = {
+    // Seoul Bites
+    "Kimchi Fried Rice": "/img/foodItems/seoul-bites/kimchi-fried-rice.jpg",
+    "Bibimbap": "/img/foodItems/seoul-bites/bibimbap.jpg",
+    "Korean Fried Chicken": "/img/foodItems/seoul-bites/korean-fried-chicken.jpg",
+    "Tteokbokki": "/img/foodItems/seoul-bites/tteokbokki.jpg",
+    "Japchae": "/img/foodItems/seoul-bites/japchae.jpg",
+    "Strawberry Bingsu": "/img/foodItems/seoul-bites/strawberry-bingsu.jpg",
+    "Hotteok": "/img/foodItems/seoul-bites/hotteok.jpg",
+    "Softdrink (Coke Products)": "/img/foodItems/seoul-bites/softdrinks.jpg",
+    "Arizona Tea": "/img/foodItems/seoul-bites/arizona.jpg",
+    
+    // Pasta Corner
+    "Chicken Alfredo": "/img/foodItems/pasta-corner/Chicken-Alfredo.jpg",
+    "Lasagna": "/img/foodItems/pasta-corner/lasagna.jpg",
+    "Spaghetti Bolognese": "/img/foodItems/pasta-corner/spaghetti-bolognese.jpg",
+    "Tiramisu": "/img/foodItems/pasta-corner/tiramisu.jpg",
+    "Vanilla Orange Cannoli": "/img/foodItems/pasta-corner/cannoli.jpg",
+    "Rossi D’Asiago": "/img/foodItems/pasta-corner/asiago.jpg",
+    "Late Bottle Vintage": "/img/foodItems/pasta-corner/late-bottle.jpg",
+
+    // Maple Grill
+    "Classic Burger": "/img/foodItems/maple-grill/burger.jpg",
+    "Grilled Salmon": "/img/foodItems/maple-grill/grilled-salmon.jpg",
+    "Caesar Salad": "/img/foodItems/maple-grill/Caesar-Salad.jpg",
+    "Nanaimo Bar": "/img/foodItems/maple-grill/nanaimo-bar.jpg",
+    "Cinnamon & Sugar Beaver Tail": "/img/foodItems/maple-grill/beavertails.jpg",
+    "Pop": "/img/foodItems/seoul-bites/softdrinks.jpg",
+
+    // Compass Test Cafe
+    "Compass Iced Cappuccino": "/img/foodItems/compass-test/cappucino.jpg",
+    "Nitro Cold Brew": "/img/foodItems/compass-test/cappucino.jpg",
+    "Flat White": "/img/foodItems/compass-test/cappucino.jpg",
+    "Compass Iced Cappuccino": "/img/foodItems/compass-test/cappucino.jpg",
+
+    // Crunch & Munch Cafe
+
+
+    // Sakura Moon Dining
+  
+  };
+
+  function getFoodImage(item) {
+    return (
+      item.imageUrl ||
+      foodImageMap[item.name] ||
+      "/img/foodItems/default-food.jpeg"
+    );
+  }
+
   useEffect(() => {
     async function loadRestaurantDetails() {
       try {
@@ -98,12 +157,25 @@ function RestaurantDetailsPage() {
 
   const categoryNames = Object.keys(groupedItems);
 
+  const heroBanner =
+    restaurant.bannerImageUrl ||
+    restaurantBannerMap[restaurant.name] ||
+    "/img/restaurants/default-banner.png";
+
   return (
     <div className="site-shell">
       <TopNav />
 
       <main className="restaurant-page">
-        <section className="restaurant-hero">
+        <section
+          className="restaurant-hero"
+          style={{
+            backgroundImage: `url(${heroBanner})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
           <div className="restaurant-hero-overlay" />
           <div className="restaurant-hero-content">
             <div className="restaurant-badges">
@@ -169,13 +241,16 @@ function RestaurantDetailsPage() {
                 </div>
 
                 <div className="menu-card-grid">
-                  {groupedItems[category].map((item, itemIndex) => (
+                  {groupedItems[category].map((item) => (
                     <article className="menu-card" key={item.id}>
-                      <div
-                        className={`menu-card-image ${
-                          itemIndex % 2 === 0 ? "menu-image-1" : "menu-image-2"
-                        }`}
-                      />
+                      <div className="menu-card-image">
+                        <img
+                          src={getFoodImage(item)}
+                          alt={item.name}
+                          className="menu-card-image-tag"
+                        />
+                      </div>
+
                       <div className="menu-card-body">
                         <div className="menu-card-top">
                           <div>
@@ -225,7 +300,9 @@ function RestaurantDetailsPage() {
               <span>Your Order</span>
               <strong>
                 {totalCartQuantity > 0
-                  ? `${totalCartQuantity} item${totalCartQuantity > 1 ? "s" : ""} — $${total.toFixed(2)}`
+                  ? `${totalCartQuantity} item${
+                      totalCartQuantity > 1 ? "s" : ""
+                    } — $${total.toFixed(2)}`
                   : "Cart is empty"}
               </strong>
             </div>
