@@ -29,6 +29,8 @@ public class Restaurant {
     @Max(value = 5, message = "Rating must be at most 5")
     private double rating;
 
+    private String bannerImageUrl;
+
     public Restaurant() {
     }
 
@@ -38,6 +40,7 @@ public class Restaurant {
         this.city = city;
         this.cuisineType = cuisineType;
         this.rating = rating;
+        this.bannerImageUrl = bannerImageUrl;
     }
 
     public String getId() {
@@ -78,5 +81,13 @@ public class Restaurant {
 
     public void setRating(double rating) {
         this.rating = rating;
+    }
+
+    public String getBannerImageUrl() {
+        return bannerImageUrl;
+    }
+
+    public void setBannerImageUrl(String bannerImageUrl) {
+        this.bannerImageUrl = bannerImageUrl;
     }
 }
